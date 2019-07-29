@@ -66,4 +66,5 @@ run:
       -group=/layers/group.toml \
       -path=./cache
 
-    echo $DIGEST >> ./image/digest
+    echo "${DIGEST}" >> ./image/digest
+    echo "sha256:${DIGEST}" >> ./image/image-id
