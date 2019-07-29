@@ -1,0 +1,23 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: concourse/docker-image-resource
+inputs:
+- name: image
+outputs:
+- name: out
+params:
+  IMAGE: 
+run:
+  path: bash
+  args:
+  - -c
+  - |
+    set -e
+    source /opt/resource/common.sh
+    start_docker 3 3
+    docker pull ${IMAGE}@$(cat image/image-id)
+    docker images
+    docker save ${IMAGE}@$(cat image/image-id) > ./out/image
+    docker images --no-trunc --digests ${IMAGE} --format "{{.ID}}" > ./out/image-id
