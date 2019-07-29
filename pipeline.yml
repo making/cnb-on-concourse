@@ -3,6 +3,10 @@ resources:
   type: git
   source:
     uri: https://github.com/making/hello-servlet.git
+- name: cnb-on-concourse
+  type: git
+  source:
+    uri: https://github.com/making/cnb-on-concourse.git
 - name: builder
   type: docker-image
   source:
@@ -12,76 +16,19 @@ jobs:
 - name: pack-build
   plan:
   - in_parallel:
+    - get: cnb-on-concourse
     - get: workspace
       resource: repo
     - get: builder
   - task: build
     image: builder
+    file: cnb-on-concourse/tasks/pack.yml
     params:
       USE_CRED_HELPERS: false
       IMAGE: ((docker-image))
       DOCKER_REGISTRY: ((docker-registry))
       DOCKER_USERNAME: ((docker-username))
       DOCKER_PASSWORD: ((docker-password))
-    config:
-      platform: linux
-      inputs:
-      - name: workspace
-      caches:
-      - path: layers
-      - path: cache
-      outputs:
-      - name: image
-      run:
-        user: root
-        path: bash
-        args: 
-        - -c
-        - |
-          set -eo pipefail
-
-          ln -fs  $(pwd)/layers /layers
-          export CNB_REGISTRY_AUTH="{\"${DOCKER_REGISTRY}\":\"Basic $(echo -n ${DOCKER_USERNAME}:${DOCKER_PASSWORD} | base64)\"}"
-
-          echo "===> DETECTING"
-          /lifecycle/detector \
-            -app=./workspace \
-            -group=/layers/group.toml \
-            -plan=/layers/plan.toml
-
-          echo "===> RESTORING"
-          /lifecycle/restorer \
-            -group=/layers/group.toml \
-            -path=./cache
-
-          echo "===> ANALYZING"
-          /lifecycle/analyzer \
-            -helpers=${USE_CRED_HELPERS} \
-            -group=/layers/group.toml \
-            ${IMAGE}
-
-          echo "===> BUILDING"
-          /lifecycle/builder \
-            -app=./workspace \
-            -group=/layers/group.toml \
-            -plan=/layers/plan.toml
-          
-          echo "===> EXPORTING"
-          /lifecycle/exporter \
-            -helpers=${USE_CRED_HELPERS} \
-            -app=/workspace \
-            -group=/layers/group.toml \
-            ${IMAGE} | tee export.log
-
-          DIGEST=$(grep ' Digest:' export.log | grep 'Digest' | sed 's/.*Digest: sha256://')
-
-          echo "===> CACHING"
-          rm -rf ./cache/*
-          /lifecycle/cacher \
-            -group=/layers/group.toml \
-            -path=./cache
-
-          echo $DIGEST >> image/digest
   - task: check-image
     config:
       platform: linux

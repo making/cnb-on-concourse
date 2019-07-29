@@ -1,0 +1,69 @@
+---
+platform: linux
+inputs:
+- name: workspace
+caches:
+- path: layers
+- path: cache
+outputs:
+- name: image
+params:
+  IMAGE: 
+  USE_CRED_HELPERS: false
+  DOCKER_REGISTRY: index.docker.io
+  DOCKER_USERNAME: ""
+  DOCKER_PASSWORD: ""
+  CNB_REGISTRY_AUTH: ""
+run:
+  user: root
+  path: bash
+  args: 
+  - -c
+  - |
+    set -eo pipefail
+
+    ln -fs  $(pwd)/layers /layers
+
+    if [ "${CNB_REGISTRY_AUTH}" = "" ];then
+      export CNB_REGISTRY_AUTH="{\"${DOCKER_REGISTRY}\":\"Basic $(echo -n ${DOCKER_USERNAME}:${DOCKER_PASSWORD} | base64)\"}"
+    fi
+
+    echo "===> DETECTING"
+    /lifecycle/detector \
+      -app=./workspace \
+      -group=/layers/group.toml \
+      -plan=/layers/plan.toml
+
+    echo "===> RESTORING"
+    /lifecycle/restorer \
+      -group=/layers/group.toml \
+      -path=./cache
+
+    echo "===> ANALYZING"
+    /lifecycle/analyzer \
+      -helpers=${USE_CRED_HELPERS} \
+      -group=/layers/group.toml \
+      ${IMAGE}
+
+    echo "===> BUILDING"
+    /lifecycle/builder \
+      -app=./workspace \
+      -group=/layers/group.toml \
+      -plan=/layers/plan.toml
+
+    echo "===> EXPORTING"
+    /lifecycle/exporter \
+      -helpers=${USE_CRED_HELPERS} \
+      -app=/workspace \
+      -group=/layers/group.toml \
+      ${IMAGE} | tee export.log
+
+    DIGEST=$(grep ' Digest:' export.log | grep 'Digest' | sed 's/.*Digest: sha256://')
+
+    echo "===> CACHING"
+    rm -rf ./cache/*
+    /lifecycle/cacher \
+      -group=/layers/group.toml \
+      -path=./cache
+
+    echo $DIGEST >> ./image/digest
