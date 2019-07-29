@@ -22,7 +22,7 @@ jobs:
     - get: builder
   - task: build
     image: builder
-    file: cnb-on-concourse/tasks/pack.yml
+    file: cnb-on-concourse/tasks/pack-build.yml
     params:
       USE_CRED_HELPERS: false
       IMAGE: ((docker-image))
