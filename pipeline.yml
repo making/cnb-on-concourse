@@ -20,7 +20,7 @@ jobs:
     params:
       USE_CRED_HELPERS: false
       IMAGE: ((docker-image))
-      DOCKER_REGISTRY: ((docker-registry)) # 
+      DOCKER_REGISTRY: ((docker-registry))
       DOCKER_USERNAME: ((docker-username))
       DOCKER_PASSWORD: ((docker-password))
     config:
