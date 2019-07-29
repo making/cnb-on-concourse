@@ -1,0 +1,6 @@
+docker-image: making/hello-servlet
+docker-registry: index.docker.io
+docker-username: ********
+docker-password: ********
+builder-image: cloudfoundry/cnb
+builder-tag: bionic
