@@ -22,7 +22,8 @@ run:
   - |
     set -eo pipefail
 
-    ln -fs  $(pwd)/layers /layers
+    ln -fs $(pwd)/layers /layers
+    ln -fs $(pwd)/workspace /workspace
 
     if [ "${CNB_REGISTRY_AUTH}" = "" ];then
       export CNB_REGISTRY_AUTH="{\"${DOCKER_REGISTRY}\":\"Basic $(echo -n ${DOCKER_USERNAME}:${DOCKER_PASSWORD} | base64)\"}"
@@ -30,7 +31,7 @@ run:
 
     echo "===> DETECTING"
     /lifecycle/detector \
-      -app=./workspace \
+      -app=/workspace \
       -group=/layers/group.toml \
       -plan=/layers/plan.toml
 
@@ -47,14 +48,14 @@ run:
 
     echo "===> BUILDING"
     /lifecycle/builder \
-      -app=./workspace \
+      -app=/workspace \
       -group=/layers/group.toml \
       -plan=/layers/plan.toml
 
     echo "===> EXPORTING"
     /lifecycle/exporter \
       -helpers=${USE_CRED_HELPERS} \
-      -app=./workspace \
+      -app=/workspace \
       -group=/layers/group.toml \
       ${IMAGE} | tee export.log
 
