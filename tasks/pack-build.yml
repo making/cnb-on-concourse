@@ -43,10 +43,12 @@ run:
     echo "===> RESTORING"
     /lifecycle/restorer \
       -group=/layers/group.toml \
+      -layers=/layers \
       -path=/cache
 
     echo "===> ANALYZING"
     /lifecycle/analyzer \
+      -layers=/layers \
       -helpers=${USE_CRED_HELPERS} \
       -group=/layers/group.toml \
       ${IMAGE}
@@ -54,13 +56,15 @@ run:
     echo "===> BUILDING"
     /lifecycle/builder \
       -app=/workspace \
+      -layers=/layers \
       -group=/layers/group.toml \
       -plan=/layers/plan.toml
 
     echo "===> EXPORTING"
     /lifecycle/exporter \
-      -helpers=${USE_CRED_HELPERS} \
       -app=/workspace \
+      -layers=/layers \
+      -helpers=${USE_CRED_HELPERS} \
       -group=/layers/group.toml \
       ${IMAGE} | tee export.log
 
