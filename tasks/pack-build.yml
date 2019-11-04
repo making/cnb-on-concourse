@@ -67,8 +67,7 @@ run:
 
     DIGEST=$(grep ' Digest:' export.log | grep 'Digest' | sed 's/.*Digest: sha256://')
 
-    echo -e '\033[38;5;163===> CACHING\033[0;00m'
-    echo "===> CACHING"
+    echo -e '\033[38;5;163m===> CACHING\033[0;00m'
     rm -rf /cache/*
     /lifecycle/cacher \
       -layers=/layers \
