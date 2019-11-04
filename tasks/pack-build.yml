@@ -3,7 +3,6 @@ platform: linux
 inputs:
 - name: workspace
 caches:
-- path: layers
 - path: cache
 outputs:
 - name: image
@@ -23,11 +22,9 @@ run:
   - |
     set -eo pipefail
 
-    rm -rf /layers
     rm -rf /workspace
     rm -rf /cache
 
-    ln -fs $(pwd)/layers /layers
     ln -fs $(pwd)/workspace /workspace
     ln -fs $(pwd)/cache /cache
 
