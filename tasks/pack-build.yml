@@ -34,7 +34,7 @@ run:
 
     echo "===> DETECTING"
     /lifecycle/detector \
-      -app=/workspace \
+      -app=$(pwd)/workspace \
       -group=/layers/group.toml \
       -plan=/layers/plan.toml
 
@@ -53,14 +53,14 @@ run:
 
     echo "===> BUILDING"
     /lifecycle/builder \
-      -app=/workspace \
+      -app=$(pwd)/workspace \
       -layers=/layers \
       -group=/layers/group.toml \
       -plan=/layers/plan.toml
 
     echo "===> EXPORTING"
     /lifecycle/exporter \
-      -app=/workspace \
+      -app=$(pwd)/workspace \
       -layers=/layers \
       -helpers=${USE_CRED_HELPERS} \
       -group=/layers/group.toml \
@@ -71,6 +71,7 @@ run:
     echo "===> CACHING"
     rm -rf /cache/*
     /lifecycle/cacher \
+      -layers=/layers \
       -group=/layers/group.toml \
       -path=/cache
 
