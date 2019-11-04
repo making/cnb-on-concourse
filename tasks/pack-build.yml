@@ -65,7 +65,12 @@ run:
       -group=/layers/group.toml \
       ${IMAGE} | tee export.log
 
+    set +e
     DIGEST=$(grep ' Digest:' export.log | grep 'Digest' | sed 's/.*Digest: sha256://')
+    if [ "${DIGEST}" = "" ];then
+      DIGEST=$(grep '(sha256' export.log | sed 's/.*sha256://' | sed 's/)://')
+    fi
+    set -e
 
     echo -e '\033[38;5;163m===> CACHING\033[0;00m'
     rm -rf /cache/*
