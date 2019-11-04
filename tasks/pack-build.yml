@@ -22,8 +22,13 @@ run:
   - |
     set -eo pipefail
 
-    ln -fs $(pwd)/layers /layers
-    ln -fs $(pwd)/workspace /workspace
+    rm -rf /layers
+    rm -rf /workspace
+    rm -rf /cache
+
+    ln -fs $(pwd)/layers/ /layers
+    ln -fs $(pwd)/workspace/ /workspace
+    ln -fs $(pwd)/workspace/ /cache
 
     if [ "${CNB_REGISTRY_AUTH}" = "" ];then
       export CNB_REGISTRY_AUTH="{\"${DOCKER_REGISTRY}\":\"Basic $(echo -n ${DOCKER_USERNAME}:${DOCKER_PASSWORD} | base64)\"}"
@@ -38,7 +43,7 @@ run:
     echo "===> RESTORING"
     /lifecycle/restorer \
       -group=/layers/group.toml \
-      -path=./cache
+      -path=/cache
 
     echo "===> ANALYZING"
     /lifecycle/analyzer \
@@ -62,10 +67,10 @@ run:
     DIGEST=$(grep ' Digest:' export.log | grep 'Digest' | sed 's/.*Digest: sha256://')
 
     echo "===> CACHING"
-    rm -rf ./cache/*
+    rm -rf /cache/*
     /lifecycle/cacher \
       -group=/layers/group.toml \
-      -path=./cache
+      -path=/cache
 
     echo "${DIGEST}" >> ./image/digest
     echo "sha256:${DIGEST}" >> ./image/image-id
