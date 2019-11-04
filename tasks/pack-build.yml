@@ -9,6 +9,7 @@ outputs:
 - name: image
 params:
   IMAGE: 
+  # Use Docker credential helpers for Google's GCR, Amazon's ECR, or Microsoft's ACR.
   USE_CRED_HELPERS: false
   DOCKER_REGISTRY: index.docker.io
   DOCKER_USERNAME: ""
@@ -26,9 +27,9 @@ run:
     rm -rf /workspace
     rm -rf /cache
 
-    ln -fs $(pwd)/layers/ /layers
-    ln -fs $(pwd)/workspace/ /workspace
-    ln -fs $(pwd)/workspace/ /cache
+    ln -fs $(pwd)/layers /layers
+    ln -fs $(pwd)/workspace /workspace
+    ln -fs $(pwd)/cache /cache
 
     if [ "${CNB_REGISTRY_AUTH}" = "" ];then
       export CNB_REGISTRY_AUTH="{\"${DOCKER_REGISTRY}\":\"Basic $(echo -n ${DOCKER_USERNAME}:${DOCKER_PASSWORD} | base64)\"}"
